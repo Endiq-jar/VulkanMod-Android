@@ -3,12 +3,11 @@
   "id": "vulkanmod",
   "version": "1.0.5",
   "name": "VulkanMod",
-  "description": "Vulkan Mod for Android ARM64 (Fabric)",
+  "description": "Vulkan Mod",
   "icon": "assets/vulkanmod/vulkan-mod_android.png",
   "authors": [
-    "ShindoZk",
-    "RKMC_GAMERZ",
-    "Collateral"
+    "xCollateral",
+    "Endiq"
   ],
   "contributors": [
     "artDev"
@@ -30,8 +29,8 @@
   ],
   "accessWidener": "vulkanmod.accesswidener",
   "depends": {
-    "fabricloader": ">=0.16.13",
-    "minecraft": ">=1.21.5"
+    "fabricloader": "*",
+    "minecraft": "*"
   },
   "custom": {
     "fabric-renderer-api-v1:contains_renderer": true
