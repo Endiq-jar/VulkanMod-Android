@@ -30,7 +30,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 if [ "$BRANCH" = "dev" ]; then
     echo "==> Building in-tree source (synced with upstream dev)..."
     cd "$ROOT"
-    exec "$ROOT/gradlew" build "$@"
+    exec bash "$ROOT/gradlew" build "$@"
 fi
 
 # Select the Android patch matching the renderer generation of the target branch.
@@ -90,7 +90,9 @@ cp "$ROOT/android/android-natives.gradle" .
 printf '\napply from: "android-natives.gradle"\n' >> build.gradle
 
 echo "==> Building..."
-./gradlew build "$@"
+# Upstream commits gradlew without the executable bit on some branches (100644),
+# so invoke it through bash to avoid a "permission denied" (exit 126).
+bash gradlew build "$@"
 
 echo "==> Copying artifacts to $ROOT/build/libs/"
 mkdir -p "$ROOT/build/libs"

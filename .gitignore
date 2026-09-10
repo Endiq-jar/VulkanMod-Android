@@ -1,6 +1,8 @@
 # Gradle
 .gradle/
-build/
+# Root build output only — anchored so source packages such as
+# net/vulkanmod/render/chunk/build/ are NOT ignored.
+/build/
 
 # IDE
 .idea/
