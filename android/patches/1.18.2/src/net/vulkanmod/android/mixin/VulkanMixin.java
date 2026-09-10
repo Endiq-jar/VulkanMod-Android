@@ -1,7 +1,7 @@
 package net.vulkanmod.android.mixin;
 
 import net.vulkanmod.android.AndroidSwapChain;
-import net.vulkanmod.vulkan.framebuffer.SwapChain;
+import net.vulkanmod.vulkan.Vulkan;
 import org.lwjgl.vulkan.VkSwapchainCreateInfoKHR;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,16 +10,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import static org.lwjgl.vulkan.VK10.VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
 /**
- * Android pre-rotation support for the swapchain.
- *
- * <p>The driver reports the surface orientation through the {@code preTransform} argument
- * of {@link VkSwapchainCreateInfoKHR#preTransform(int)}. We capture that transform (for
- * {@link AndroidSwapChain#hasPreRotation}) and force the swapchain to the identity
- * transform so the compositor never rotates the image; rotation is handled on our side
- * instead (see {@link AndroidSwapChain}).
+ * Android pre-rotation support for the 1.18.2 / 1.19.2 renderer, where the swapchain is
+ * created directly inside {@code Vulkan#createSwapChain}.
  */
-@Mixin(SwapChain.class)
-public class SwapChainMixin {
+@Mixin(Vulkan.class)
+public class VulkanMixin {
 
     @Redirect(
             method = "createSwapChain",

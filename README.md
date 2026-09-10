@@ -52,13 +52,17 @@ rendering pipeline (many OptiFine-style / shader mods).
 
 ## Version matrix
 
+Every Minecraft version that upstream VulkanMod supports has an Android patch. Each
+upstream branch maps to one of three renderer "generations" (see `android/patches/`):
+
 | Minecraft | Upstream branch | Android patch | Status |
 | --- | --- | --- | --- |
 | 1.21.11 (latest) | `dev` | in-tree `src/` | ✔ synced |
-| 1.21 | `1.21` | `android/legacy-patch` | ✔ applies as-is |
-| 1.20.4 | `1.20.x` | `android/legacy-patch` | ✔ applies as-is |
-| 1.19.4 | `1.19.4` | `android/legacy-patch` | ⚠ needs `QueueFamilyIndices` `Integer`→`int` tweak |
-| 1.19.2 / 1.18.2 | `1.19.2` / `1.18.2` | — | ⚠ different renderer layout, deeper port needed |
+| 1.21 | `1.21` | `android/patches/1.21.x` | ✔ |
+| 1.20.4 | `1.20.x` | `android/patches/1.21.x` | ✔ |
+| 1.19.4 | `1.19.4` | `android/patches/1.19.4` | ✔ |
+| 1.19.2 | `1.19.2` | `android/patches/1.18.2` | ✔ |
+| 1.18.2 | `1.18.2` | `android/patches/1.18.2` | ✔ |
 
 > "Every single Minecraft version" is bounded by what upstream VulkanMod itself supports
 > (see its [branches](https://github.com/xCollateral/VulkanMod/branches)). Supporting an
@@ -105,15 +109,17 @@ Android icon and the extra translations. Review the diff afterwards — `build.g
 ## Repository layout
 
 ```
-src/main/java/net/vulkanmod/…        upstream VulkanMod source (synced)
+src/main/java/net/vulkanmod/…         upstream VulkanMod source (synced)
 src/main/java/net/vulkanmod/android/…  Android pre-rotation + present handling (mixins)
-src/main/resources/…                 shaders, lang, fabric.mod.json, mixins, access widener
-linux/arm64, linux/arm32/…           bundled Android natives (shaderc, vma)
-android/android-natives.gradle       jar packaging for the natives
-android/legacy-patch/…               Android patch for the older version branches
-scripts/sync-upstream.sh             sync tool
-scripts/build-version.sh             per-version build tool
-.github/workflows/build.yml          multi-version CI build
+src/main/resources/…                  shaders, lang, fabric.mod.json, mixins, access widener
+linux/arm64, linux/arm32/…            bundled Android natives (shaderc, vma)
+android/android-natives.gradle        jar packaging for the natives
+android/patches/1.21.x/…              Android patch for the 1.20.x / 1.21 renderer generation
+android/patches/1.19.4/…              Android patch for 1.19.4
+android/patches/1.18.2/…              Android patch for 1.18.2 / 1.19.2
+scripts/sync-upstream.sh              sync tool
+scripts/build-version.sh              per-version build tool
+.github/workflows/build.yml           multi-version CI build
 ```
 
 ## Installation
@@ -132,9 +138,12 @@ scripts/build-version.sh             per-version build tool
   above because they present with an identity surface transform. The helpers are
   reconstructed and the rotation matrix is now populated in `AndroidSwapChain#setupTransform`,
   but `applyPreRotation` is still not wired into the projection — full pre-rotation for
-  rotated surfaces remains a TODO (see `VRenderSystemMixin` in `android/legacy-patch`).
-* The legacy patch is faithful to the 1.21.5 jar; older branches (1.19.4 and below) may
-  need small API adaptations as noted in the version matrix.
+  rotated surfaces remains a TODO (see `VRenderSystemMixin` in `android/patches/1.21.x`).
+* The patches are faithful to the 1.21.5 jar and adapted per renderer generation; each
+  upstream branch targets a different Minecraft mapping, so the `@Redirect` targets are
+  written against the stable LWJGL entry points (`VkSwapchainCreateInfoKHR#preTransform`,
+  `vkAcquireNextImageKHR`, `vkQueuePresentKHR`) rather than version-specific game classes
+  wherever possible.
 
 ## License
 

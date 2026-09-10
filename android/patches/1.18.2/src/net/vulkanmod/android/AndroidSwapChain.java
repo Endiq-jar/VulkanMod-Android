@@ -48,7 +48,15 @@ public class AndroidSwapChain {
      * Captures the current surface transform and derives the pre-rotation state.
      */
     public static void setupTransform(VkSurfaceCapabilitiesKHR capabilities) {
-        currentTransform = capabilities.currentTransform() & 0b1110; // ROTATE_90 | ROTATE_180 | ROTATE_270
+        setupTransform(capabilities.currentTransform());
+    }
+
+    /**
+     * Captures the surface transform (as passed to
+     * {@code VkSwapchainCreateInfoKHR#preTransform(int)}) and derives the pre-rotation state.
+     */
+    public static void setupTransform(int transform) {
+        currentTransform = transform & 0b1110; // ROTATE_90 | ROTATE_180 | ROTATE_270
 
         // Complete the rotation matrix. The reference artifact shipped this as identity;
         // it is populated here so that pre-rotation works on launchers that do expose a
