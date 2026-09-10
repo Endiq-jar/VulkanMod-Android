@@ -9,7 +9,8 @@
     "FramebufferMixin",
     "QueueMixin",
     "RendererMixin",
-    "SwapChainMixin"
+    "SwapChainMixin",
+    "VRenderSystemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

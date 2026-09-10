@@ -14,3 +14,4 @@ Applies to upstream branch **`1.19.4`** (Minecraft 1.19.4).
 | `AndroidSwapChain.java` | Surface-transform / pre-rotation helpers |
 | `mixin/SwapChainMixin.java` | Captures the surface transform, forces `preTransform = IDENTITY` |
 | `mixin/DrawerMixin.java` | Treats `VK_SUBOPTIMAL_KHR` as success while pre-rotation is active |
+| `mixin/VRenderSystemMixin.java` | Applies the surface pre-rotation to the projection matrix |

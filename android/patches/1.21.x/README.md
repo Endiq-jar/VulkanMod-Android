@@ -21,7 +21,6 @@ jar (which shipped without sources):
 | `mixin/DrawBuffersMixin.java` | Pins the six-argument `bindBuffers` implementation |
 | `mixin/FramebufferMixin.java` | Shadows `Framebuffer#width`/`height` (as in the original jar) |
 | `mixin/RendererAccessor.java` | Accessor for `Renderer` (present in the jar but unregistered) |
-| `mixin/VRenderSystemMixin.java` | Shadows the projection-matrix buffer (present in the jar but unregistered) |
+| `mixin/VRenderSystemMixin.java` | Applies the surface pre-rotation to the projection matrix (completes the original jar's latent intent) |
 
-`vulkanmod.android.mixins.json` registers the five active mixins exactly as the original
-jar did.
+`vulkanmod.android.mixins.json` registers the active mixins.

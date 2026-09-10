@@ -3,6 +3,8 @@ package net.vulkanmod.android;
 import org.joml.Matrix4f;
 import org.lwjgl.vulkan.VkSurfaceCapabilitiesKHR;
 
+import java.nio.FloatBuffer;
+
 import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR;
 import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR;
 import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
@@ -78,6 +80,29 @@ public class AndroidSwapChain {
      */
     public static void applyPreRotation(Matrix4f projection) {
         preRotateMat.mul(projection, projection);
+    }
+
+    /** Scratch matrix reused by {@link #applyPreRotation(FloatBuffer)} to avoid allocations. */
+    private static final Matrix4f TEMP = new Matrix4f();
+
+    /**
+     * Applies the pre-rotation matrix to a column-major 4x4 matrix stored in a
+     * {@link FloatBuffer} (16 floats), in place. A no-op when the surface transform is
+     * identity.
+     *
+     * @param columnMajor buffer holding the matrix; its position is restored on return
+     */
+    public static void applyPreRotation(FloatBuffer columnMajor) {
+        if (!hasPreRotation)
+            return;
+
+        int pos = columnMajor.position();
+        columnMajor.position(0);
+        TEMP.set(columnMajor);
+        preRotateMat.mul(TEMP, TEMP);
+        columnMajor.position(0);
+        TEMP.get(columnMajor);
+        columnMajor.position(pos);
     }
 
     /**

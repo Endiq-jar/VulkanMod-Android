@@ -120,6 +120,8 @@ android/patches/1.18.2/…              Android patch for 1.18.2 / 1.19.2
 scripts/sync-upstream.sh              sync tool
 scripts/build-version.sh              per-version build tool
 .github/workflows/build.yml           multi-version CI build
+.github/workflows/release.yml         builds & publishes a release for every version
+.github/workflows/sync-upstream.yml   automated weekly upstream sync (opens a PR)
 ```
 
 ## Installation
@@ -129,21 +131,30 @@ scripts/build-version.sh              per-version build tool
 2. Drop the `.jar` into the `mods` folder of one of the supported launchers, with the
    Fabric mod loader installed for your Minecraft version.
 
+## Automation
+
+* **`.github/workflows/build.yml`** — builds every Minecraft version on every push/PR (the
+  CI matrix above).
+* **`.github/workflows/release.yml`** — on a `v*` tag, builds all six versions and attaches
+  the jars to a draft GitHub Release.
+* **`.github/workflows/sync-upstream.yml`** — weekly (or manual) sync with upstream
+  `xCollateral/VulkanMod`; opens a PR when upstream has changes.
+
 ## Known limitations
 
-* **Pre-rotation is minimal.** The reference 1.21.5 artifact forces an identity surface
-  transform and ignores `VK_SUBOPTIMAL_KHR` while rotated, but never applied the rotation
-  matrix to the projection (`applyPreRotation` / `getTransformExtent` were present but
-  unused, and `preRotateMat` was left as identity). This works on the launchers listed
-  above because they present with an identity surface transform. The helpers are
-  reconstructed and the rotation matrix is now populated in `AndroidSwapChain#setupTransform`,
-  but `applyPreRotation` is still not wired into the projection — full pre-rotation for
-  rotated surfaces remains a TODO (see `VRenderSystemMixin` in `android/patches/1.21.x`).
-* The patches are faithful to the 1.21.5 jar and adapted per renderer generation; each
-  upstream branch targets a different Minecraft mapping, so the `@Redirect` targets are
-  written against the stable LWJGL entry points (`VkSwapchainCreateInfoKHR#preTransform`,
-  `vkAcquireNextImageKHR`, `vkQueuePresentKHR`) rather than version-specific game classes
-  wherever possible.
+* **Pre-rotation is now wired end-to-end for the joml renderer generations** (1.19.4,
+  1.20.x, 1.21, latest): `SwapChainMixin`/`VulkanMixin` force an identity surface
+  transform, `RendererMixin`/`DrawerMixin` absorb `VK_SUBOPTIMAL_KHR` while rotated, and
+  `VRenderSystemMixin` rotates the projection matrix by the surface transform. On identity
+  surfaces (the launchers listed above present identity) every step is a strict no-op, so
+  behaviour is unchanged there. The swapchain image *extent* is still not swapped for 90°/270°
+  rotations, so a genuinely rotated surface renders at the correct orientation but with the
+  unswapped aspect ratio — the remaining piece to finish, and it needs on-device testing.
+* **1.18.2 / 1.19.2** keep the reference-jar behaviour (identity pre-transform +
+  `VK_SUBOPTIMAL_KHR` handling only); they use Minecraft's own matrix class rather than
+  joml, so the projection pre-rotation mixin does not apply to them.
+* The mod jars compile for every version (CI-verified) but have **not been runtime-tested
+  on an Android device/launcher** — no such environment is available here.
 
 ## License
 

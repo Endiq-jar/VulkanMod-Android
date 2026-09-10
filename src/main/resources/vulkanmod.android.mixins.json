@@ -6,7 +6,8 @@
   "mixins": [],
   "client": [
     "RendererMixin",
-    "SwapChainMixin"
+    "SwapChainMixin",
+    "VRenderSystemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

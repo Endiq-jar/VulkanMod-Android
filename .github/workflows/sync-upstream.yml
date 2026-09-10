@@ -1,0 +1,33 @@
+name: sync-upstream
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync from upstream VulkanMod (dev)
+        run: scripts/sync-upstream.sh dev
+
+      - name: Create pull request if changed
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: 'chore: sync with upstream VulkanMod'
+          branch: chore/sync-upstream
+          title: 'chore: sync with upstream VulkanMod'
+          body: |
+            Automated sync with [xCollateral/VulkanMod](https://github.com/xCollateral/VulkanMod) (dev branch).
+
+            Run `scripts/sync-upstream.sh` locally to reproduce.
+          labels: dependencies
+          delete-branch: true
