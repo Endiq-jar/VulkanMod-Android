@@ -28,15 +28,11 @@ public class DrawBuffersMixin {
     private AreaBuffer indexBuffer;
 
     @Shadow
-    public AreaBuffer getAreaBuffer(TerrainRenderType r) {
-        throw new AssertionError();
-    }
+    public abstract AreaBuffer getAreaBuffer(TerrainRenderType r);
 
     @Shadow
-    public void updateChunkAreaOrigin(VkCommandBuffer commandBuffer, Pipeline pipeline,
-                                      double camX, double camY, double camZ, MemoryStack stack) {
-        throw new AssertionError();
-    }
+    public abstract void updateChunkAreaOrigin(VkCommandBuffer commandBuffer, Pipeline pipeline,
+                                               double camX, double camY, double camZ, MemoryStack stack);
 
     @Overwrite(remap = false)
     public void bindBuffers(VkCommandBuffer commandBuffer, Pipeline pipeline,
