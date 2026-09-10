@@ -13,7 +13,7 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.vulkan.KHRSwapchain.vkAcquireNextImageKHR;
 import static org.lwjgl.vulkan.KHRSwapchain.vkQueuePresentKHR;
-import static org.lwjgl.vulkan.VK10.VK_SUBOPTIMAL_KHR;
+import static org.lwjgl.vulkan.KHRSwapchain.VK_SUBOPTIMAL_KHR;
 import static org.lwjgl.vulkan.VK10.VK_SUCCESS;
 
 /**

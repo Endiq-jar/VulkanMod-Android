@@ -3,9 +3,9 @@ package net.vulkanmod.android;
 import org.joml.Matrix4f;
 import org.lwjgl.vulkan.VkSurfaceCapabilitiesKHR;
 
-import static org.lwjgl.vulkan.VK10.VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR;
-import static org.lwjgl.vulkan.VK10.VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR;
-import static org.lwjgl.vulkan.VK10.VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
+import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_ROTATE_180_BIT_KHR;
+import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_ROTATE_270_BIT_KHR;
+import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR;
 
 /**
  * Android-specific swap-chain pre-rotation support.

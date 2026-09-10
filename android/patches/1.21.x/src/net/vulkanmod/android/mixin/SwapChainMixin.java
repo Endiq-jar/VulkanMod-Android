@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import static org.lwjgl.vulkan.VK10.VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+import static org.lwjgl.vulkan.KHRSurface.VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
 
 /**
  * Android pre-rotation support for the swapchain.
