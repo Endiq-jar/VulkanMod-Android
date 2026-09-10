@@ -1,0 +1,13 @@
+// Embeds the Android native libraries (LWJGL shaderc / vma for arm32 & arm64) at the
+// root of the mod jar, using the same layout as the LWJGL natives jars:
+//
+//   linux/arm64/org/lwjgl/shaderc/libshaderc.so
+//   linux/arm64/org/lwjgl/vma/liblwjgl_vma.so
+//   linux/arm32/...
+//
+// These natives are NOT published to Maven Central, so they are committed to the
+// repository under `linux/` and bundled directly into the jar. The Android launchers
+// (PojavLauncher et al.) load them from the mod classpath.
+jar {
+    from(rootProject.file("linux"))
+}

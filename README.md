@@ -1,58 +1,142 @@
 # VulkanMod for Android
 
-<img src="assets/vulkanmod/vulkan-mod_android.png" width=200 height="200">
+<img src="src/main/resources/assets/vulkanmod/vulkan-mod_android.png" width="200" height="200">
 
-**Credits:xCollateral**
+A Vulkan renderer mod for Minecraft: Java Edition, ported to **Android**. This project is
+kept in sync with the upstream renderer
+**[xCollateral/VulkanMod](https://github.com/xCollateral/VulkanMod)** and layers the
+Android-specific changes on top, for every Minecraft version that upstream supports.
 
-This repository contains a Vulkan-based renderer mod for Minecraft: Java Edition, ported for Android devices. This mod aims to significantly improve performance and graphical fidelity by leveraging the modern Vulkan graphics API. It is designed to be used with popular custom launchers such as FoldCraft Launcher, Zalith Launcher, and TurtleLauncher.
+**Credits:** [xCollateral](https://github.com/xCollateral) (upstream VulkanMod),
+[Endiq](https://github.com/Endiq-jar) (Android port).
+
 ---
+
+## What this repository is
+
+The original VulkanMod-Android releases were distributed as prebuilt jars only (the
+repository contained a decompiled jar rather than source). This repository turns that into
+a proper, buildable source project:
+
+* **Synced with upstream** — the full `xCollateral/VulkanMod` source (latest `dev` branch)
+  lives in `src/main/` and can be refreshed with `scripts/sync-upstream.sh`.
+* **Android source reconstructed** — the Android-specific code (`net.vulkanmod.android.*`)
+  was recovered from the decompiled 1.21.5 jar and rewritten as maintainable Java.
+* **Multi-version** — one project that builds for the current version and a version-matrix
+  script/workflow that produces Android builds for the older Minecraft versions too.
+
 ## Features
- * Enhanced Performance: By replacing the OpenGL renderer with the more efficient Vulkan API, this mod can lead to higher frame rates and smoother gameplay, especially on modern hardware.
- * Reduced CPU Overhead: Vulkan's architecture allows for better distribution of rendering tasks, reducing the CPU bottleneck and freeing up resources for other processes.
- * Improved Graphical Capabilities: Paves the way for advanced graphical features and optimizations that are not possible with the older OpenGL API.
- * Optimized for Android: Specifically tailored to run on Android devices, taking advantage of the prevalent support for Vulkan in recent Android versions.
-Compatibility
- * Android version: 10+
- * Operating System: Android
- * Vulkan Support required: Yes
- * Minium vulkan version: Vulkan 1.2
- * Launchers:
-   * Zalith Launcher
-   * PojavLauncher
-   * FoldCraft Launcher
-   * Turtle launcher
-   * Cryonix launcher
-   * HyperX launcher
-   * RX launcher
-   * MJ launcher/mojo launcher
-   * SolCraft launcher
-   * Copper launcher
- * Mod Incompatibility: This mod is fundamentally incompatible with most mods that directly interact with or modify the OpenGL rendering pipeline. This includes many popular optimization and shader mods.
-Installation
-Prerequisites
- * An Android device with an ARM64 processor.
- * One of the supported launchers installed.
- * The Fabric mod loader installed for your desired Minecraft version within the launcher.
-General Instructions
- * Download the Mod: Grab the latest release of the VulkanMod for ARM64 from the [Releases](https://github.com/Endiq-jar/VulkanMod-Android/releases) page.
-* Place the downloaded .jar file into the mods folder.
-Launcher-Specific Instructions
-Building from Source (For Developers)
-To compile this mod from its source code, you will need:
- * Java Development Kit (JDK) 8 or newer.
- * Git.
-<!-- end list -->
-# Clone the repository
-```
-git clone [https://github.com/shindozk/VulkanMod-Android-ARM64]
-cd [repository-folder]
+
+* **Vulkan rendering** — replaces the OpenGL renderer with Vulkan for higher frame rates,
+  lower CPU overhead and better frame pacing.
+* **Android pre-rotation** — creates the swapchain with an identity surface transform and
+  handles device rotation on our side instead of letting the compositor rotate every
+  frame (see [`AndroidSwapChain`](src/main/java/net/vulkanmod/android/AndroidSwapChain.java)).
+* **Android queue selection** — picks present/transfer queues via surface support probing
+  (merged upstream for recent versions; kept for older branches).
+* **ARM64 & ARM32 natives** — `libshaderc.so` and `liblwjgl_vma.so` for `linux/arm64` and
+  `linux/arm32` are bundled directly into the jar.
+
+## Compatibility
+
+| | |
+| --- | --- |
+| OS | Android 10+ |
+| Architecture | ARM64 (arm32 natives included) |
+| Vulkan | 1.2+ required |
+| Mod loader | Fabric |
+| Launchers | Zalith, PojavLauncher, FoldCraft, Turtle, Cryonix, HyperX, RX, MJ/Mojo, SolCraft, Copper |
+
+This mod is fundamentally incompatible with most mods that directly touch the OpenGL
+rendering pipeline (many OptiFine-style / shader mods).
+
+## Version matrix
+
+| Minecraft | Upstream branch | Android patch | Status |
+| --- | --- | --- | --- |
+| 1.21.11 (latest) | `dev` | in-tree `src/` | ✔ synced |
+| 1.21 | `1.21` | `android/legacy-patch` | ✔ applies as-is |
+| 1.20.4 | `1.20.x` | `android/legacy-patch` | ✔ applies as-is |
+| 1.19.4 | `1.19.4` | `android/legacy-patch` | ⚠ needs `QueueFamilyIndices` `Integer`→`int` tweak |
+| 1.19.2 / 1.18.2 | `1.19.2` / `1.18.2` | — | ⚠ different renderer layout, deeper port needed |
+
+> "Every single Minecraft version" is bounded by what upstream VulkanMod itself supports
+> (see its [branches](https://github.com/xCollateral/VulkanMod/branches)). Supporting an
+> arbitrary Minecraft release requires the matching upstream branch to exist; the tooling
+> here (below) makes adding one a one-line change.
+
+## Building
+
+Requirements: JDK 21, and network access to Maven (Fabric / Maven Central / Gradle).
+
+```bash
+# Clone and build the current (latest) version
+git clone https://github.com/Endiq-jar/VulkanMod-Android.git
+cd VulkanMod-Android
+./gradlew build            # → build/libs/VulkanMod-Android-*.jar
 ```
 
-# Build the project (example using Gradle)
-`./gradlew build`
+The Gradle wrapper jar is generated on first run (`./gradlew wrapper`), or use a local
+Gradle 9.x install. CI (below) uses `gradle/actions` so it does not need the wrapper jar.
 
-The compiled .jar file will be located in the build/libs directory.
-Contributing
-Contributions from the community are welcome! If you would like to contribute, please fork the repository and submit a pull request with your changes. Before contributing, please open an issue to discuss the proposed changes.
-License
-This project is licensed under the MIT License.
+Build a specific Minecraft version (checks out the matching upstream branch, applies the
+Android patch and builds):
+
+```bash
+scripts/build-version.sh 1.21
+scripts/build-version.sh 1.20.x
+scripts/build-version.sh 1.19.4
+```
+
+The `.github/workflows/build.yml` matrix does exactly this on every push.
+
+## Keeping in sync with upstream
+
+```bash
+scripts/sync-upstream.sh           # sync with upstream dev (latest)
+scripts/sync-upstream.sh 1.21      # sync with a specific branch
+```
+
+The script overwrites the Java sources, shaders, mixin config and access widener with the
+upstream state while preserving `net/vulkanmod/android/*`, the Android mixins config, the
+Android icon and the extra translations. Review the diff afterwards — `build.gradle` and
+`gradle.properties` are intentionally left untouched (they carry the Android additions).
+
+## Repository layout
+
+```
+src/main/java/net/vulkanmod/…        upstream VulkanMod source (synced)
+src/main/java/net/vulkanmod/android/…  Android pre-rotation + present handling (mixins)
+src/main/resources/…                 shaders, lang, fabric.mod.json, mixins, access widener
+linux/arm64, linux/arm32/…           bundled Android natives (shaderc, vma)
+android/android-natives.gradle       jar packaging for the natives
+android/legacy-patch/…               Android patch for the older version branches
+scripts/sync-upstream.sh             sync tool
+scripts/build-version.sh             per-version build tool
+.github/workflows/build.yml          multi-version CI build
+```
+
+## Installation
+
+1. Grab the matching jar from the [Releases](https://github.com/Endiq-jar/VulkanMod-Android/releases)
+   (or build one above).
+2. Drop the `.jar` into the `mods` folder of one of the supported launchers, with the
+   Fabric mod loader installed for your Minecraft version.
+
+## Known limitations
+
+* **Pre-rotation is minimal.** The reference 1.21.5 artifact forces an identity surface
+  transform and ignores `VK_SUBOPTIMAL_KHR` while rotated, but never applied the rotation
+  matrix to the projection (`applyPreRotation` / `getTransformExtent` were present but
+  unused, and `preRotateMat` was left as identity). This works on the launchers listed
+  above because they present with an identity surface transform. The helpers are
+  reconstructed and the rotation matrix is now populated in `AndroidSwapChain#setupTransform`,
+  but `applyPreRotation` is still not wired into the projection — full pre-rotation for
+  rotated surfaces remains a TODO (see `VRenderSystemMixin` in `android/legacy-patch`).
+* The legacy patch is faithful to the 1.21.5 jar; older branches (1.19.4 and below) may
+  need small API adaptations as noted in the version matrix.
+
+## License
+
+* This project: MIT ([`LICENSE`](LICENSE)).
+* Upstream VulkanMod: LGPL-3.0 ([`LICENSE_VulkanMod_1.21.5`](LICENSE_VulkanMod_1.21.5)).
