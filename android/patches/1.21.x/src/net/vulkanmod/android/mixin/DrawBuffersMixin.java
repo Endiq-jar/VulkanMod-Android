@@ -22,7 +22,7 @@ import static org.lwjgl.vulkan.VK10.vkCmdBindIndexBuffer;
  * uniforms), so this overwrite only applies to the older version branches.
  */
 @Mixin(DrawBuffers.class)
-public class DrawBuffersMixin {
+public abstract class DrawBuffersMixin {
 
     @Shadow
     private AreaBuffer indexBuffer;
