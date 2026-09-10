@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+# Root build output only — anchored so source packages such as
+# net/vulkanmod/render/chunk/build/ are NOT ignored.
+/build/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.run/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+out/
+*.log

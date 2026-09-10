@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.vulkanmod.android.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [],
+  "client": [
+    "RendererMixin",
+    "SwapChainMixin",
+    "VRenderSystemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
