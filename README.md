@@ -147,9 +147,30 @@ scripts/build-version.sh              per-version build tool
   transform, `RendererMixin`/`DrawerMixin` absorb `VK_SUBOPTIMAL_KHR` while rotated, and
   `VRenderSystemMixin` rotates the projection matrix by the surface transform. On identity
   surfaces (the launchers listed above present identity) every step is a strict no-op, so
-  behaviour is unchanged there. The swapchain image *extent* is still not swapped for 90°/270°
-  rotations, so a genuinely rotated surface renders at the correct orientation but with the
-  unswapped aspect ratio — the remaining piece to finish, and it needs on-device testing.
+  behaviour is unchanged there.
+  * **Identity is only used when the surface advertises
+    `VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR`.** A driver that does not support it used to
+    reject the swapchain (`VK_ERROR_INITIALIZATION_FAILED` → crash on launch); the
+    compositor transform is now kept and pre-rotation disabled instead.
+  * The Android mixins are injected with `require = 0` and are wrapped in defensive
+    try/catch blocks, so a driver/upstream change disables pre-rotation instead of
+    crashing the game. `VRenderSystemMixin` now uses a `TAIL` injection rather than an
+    `@Overwrite`, which also stops it from fighting other mods that inject into the same
+    method.
+  * The swapchain image *extent* is still not swapped for 90°/270° rotations, so a
+    genuinely rotated surface renders at the correct orientation but with the unswapped
+    aspect ratio — the remaining piece to finish, and it needs on-device testing.
+* **Device creation works on Vulkan 1.1 Android drivers.** `VK_KHR_synchronization2` is no
+  longer required (the renderer never uses it), and the Vulkan 1.2 feature structures
+  (`VkPhysicalDeviceVulkan11Features` / `Vulkan12Features`) are only chained when the device
+  actually advertises Vulkan 1.2. On 1.1 devices the 1.1 core
+  `VkPhysicalDeviceShaderDrawParametersFeatures` structure is used instead, and the core
+  feature set is enabled through a `VkPhysicalDeviceFeatures2` chain (with
+  `pEnabledFeatures = NULL`, as required by the spec). Previously the invalid 1.2 structures
+  made `vkCreateDevice` fail on those devices with
+  `VulkanMod Device Report — Device Manager not initialized`.
+  `VK_KHR_dynamic_rendering` is still mandatory: recent VulkanMod versions use dynamic
+  rendering for every pass, and no fallback render-pass path is exercised.
 * **1.18.2 / 1.19.2** keep the reference-jar behaviour (identity pre-transform +
   `VK_SUBOPTIMAL_KHR` handling only); they use Minecraft's own matrix class rather than
   joml, so the projection pre-rotation mixin does not apply to them.

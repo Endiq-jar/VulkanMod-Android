@@ -32,7 +32,8 @@ public class RendererMixin {
                     value = "INVOKE",
                     target = "Lorg/lwjgl/vulkan/KHRSwapchain;vkAcquireNextImageKHR(Lorg/lwjgl/vulkan/VkDevice;JJJJLjava/nio/IntBuffer;)I"
             ),
-            remap = false
+            remap = false,
+            require = 0
     )
     private int checkSubOptimalSwapChain(VkDevice device, long swapchain, long timeout,
                                          long semaphore, long fence, IntBuffer pImageIndex) {
@@ -46,7 +47,8 @@ public class RendererMixin {
                     value = "INVOKE",
                     target = "Lorg/lwjgl/vulkan/KHRSwapchain;vkQueuePresentKHR(Lorg/lwjgl/vulkan/VkQueue;Lorg/lwjgl/vulkan/VkPresentInfoKHR;)I"
             ),
-            remap = false
+            remap = false,
+            require = 0
     )
     private int checkSubOptimalSwapChain(VkQueue queue, VkPresentInfoKHR pPresentInfo) {
         return checkSubOptimalSwapChain(vkQueuePresentKHR(queue, pPresentInfo));
