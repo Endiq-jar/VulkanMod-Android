@@ -65,7 +65,7 @@ public class Vulkan {
     }
 
     public static final Set<String> REQUIRED_DEVICE_EXTENSIONS = Set.of(
-            "VK_KHR_dynamic_rendering", "VK_KHR_swapchain"
+            "VK_KHR_dynamic_rendering", "VK_KHR_synchronization2", "VK_KHR_swapchain"
     );
 
     public static long window;

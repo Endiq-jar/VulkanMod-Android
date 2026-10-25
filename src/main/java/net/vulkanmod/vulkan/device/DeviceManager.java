@@ -24,7 +24,6 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.vulkan.EXTDebugUtils.VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 import static org.lwjgl.vulkan.KHRSurface.*;
 import static org.lwjgl.vulkan.VK10.*;
-import static org.lwjgl.vulkan.VK11.VK_API_VERSION_1_1;
 import static org.lwjgl.vulkan.VK12.VK_API_VERSION_1_2;
 
 public abstract class DeviceManager {
@@ -172,6 +171,14 @@ public abstract class DeviceManager {
                 queueCreateInfo.pQueuePriorities(stack.floats(1.0f));
             }
 
+            VkPhysicalDeviceVulkan11Features deviceVulkan11Features = VkPhysicalDeviceVulkan11Features.calloc(stack);
+            deviceVulkan11Features.sType$Default();
+            deviceVulkan11Features.shaderDrawParameters(device.isDrawIndirectSupported());
+
+            VkPhysicalDeviceVulkan12Features deviceVulkan12Features = VkPhysicalDeviceVulkan12Features.calloc(stack);
+            deviceVulkan12Features.sType$Default();
+            deviceVulkan12Features.hostQueryReset(true);
+
             VkPhysicalDeviceFeatures2 deviceFeatures = VkPhysicalDeviceFeatures2.calloc(stack);
             deviceFeatures.sType$Default();
             deviceFeatures.features().samplerAnisotropy(device.availableFeatures.features().samplerAnisotropy());
@@ -185,41 +192,25 @@ public abstract class DeviceManager {
                 VRenderSystem.canSetLineWidth = true;
             }
 
-            // VkPhysicalDeviceVulkan11Features is only valid when the device advertises
-            // Vulkan 1.2. Android devices are frequently limited to Vulkan 1.1, where
-            // chaining it (and the Vulkan12 structures it replaced) makes the
-            // vkCreateDevice call fail. Use the 1.1 core structure on those devices.
-            if (device.properties().apiVersion() >= VK_API_VERSION_1_2) {
-                VkPhysicalDeviceVulkan11Features deviceVulkan11Features = VkPhysicalDeviceVulkan11Features.calloc(stack);
-                deviceVulkan11Features.sType$Default();
-                deviceVulkan11Features.shaderDrawParameters(device.isDrawIndirectSupported());
-
-                deviceFeatures.pNext(deviceVulkan11Features);
-            } else if (device.isDrawIndirectSupported() && device.properties().apiVersion() >= VK_API_VERSION_1_1) {
-                VkPhysicalDeviceShaderDrawParametersFeatures drawParametersFeatures = VkPhysicalDeviceShaderDrawParametersFeatures.calloc(stack);
-                drawParametersFeatures.sType$Default();
-                drawParametersFeatures.shaderDrawParameters(true);
-
-                deviceFeatures.pNext(drawParametersFeatures);
-            }
-
-            if (Vulkan.DYNAMIC_RENDERING) {
-                VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeaturesKHR = VkPhysicalDeviceDynamicRenderingFeaturesKHR.calloc(stack);
-                dynamicRenderingFeaturesKHR.sType$Default();
-                dynamicRenderingFeaturesKHR.dynamicRendering(true);
-
-                // pNext() prepends: the final chain is features2 -> dynamicRendering -> 1.1.
-                deviceFeatures.pNext(dynamicRenderingFeaturesKHR);
+            if (device.availableFeatures12.samplerFilterMinmax()) {
+                deviceVulkan12Features.samplerFilterMinmax(true);
             }
 
             VkDeviceCreateInfo createInfo = VkDeviceCreateInfo.calloc(stack);
             createInfo.sType$Default();
             createInfo.sType(VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO);
             createInfo.pQueueCreateInfos(queueCreateInfos);
-            // pEnabledFeatures must be NULL when a VkPhysicalDeviceFeatures2 structure is
-            // part of the pNext chain, otherwise vkCreateDevice is invalid.
-            createInfo.pEnabledFeatures(null);
-            createInfo.pNext(deviceFeatures);
+            createInfo.pEnabledFeatures(deviceFeatures.features());
+            createInfo.pNext(deviceVulkan11Features);
+            createInfo.pNext(deviceVulkan12Features);
+
+            if (Vulkan.DYNAMIC_RENDERING) {
+                VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamicRenderingFeaturesKHR = VkPhysicalDeviceDynamicRenderingFeaturesKHR.calloc(stack);
+                dynamicRenderingFeaturesKHR.sType$Default();
+                dynamicRenderingFeaturesKHR.dynamicRendering(true);
+
+                deviceVulkan11Features.pNext(dynamicRenderingFeaturesKHR.address());
+            }
 
             HashSet<String> enabledExtensions = new HashSet<>(Vulkan.REQUIRED_DEVICE_EXTENSIONS);
 

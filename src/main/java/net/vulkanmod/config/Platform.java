@@ -73,7 +73,7 @@ public abstract class Platform {
     }
 
     public static boolean isWindows() {
-        return OS == Util.OS.WINDOWS;
+        return OS == Util.OS.LINUX;
     }
 
     public static boolean isLinux() {
